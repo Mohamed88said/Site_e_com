@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Détail de la commande #{{ order.pk }}</h2>
+  <p>Status : {{ order.get_status_display }}</p>
+  <p>Client : {{ order.buyer.username }}</p>
+  <p>Vendeur : {{ order.seller.username }}</p>
+  <p>Livraison : {{ order.delivery_address }}</p>
+  <p>Montant total : {{ order.total_amount }} GNF</p>
+  <ul>
+    {% for item in order.items.all %}
+      <li>
+        Produit : {{ item.product.name }}<br>
+        Quantité : {{ item.quantity }}<br>
+        Prix unitaire : {{ item.price }} GNF
+      </li>
+    {% endfor %}
+  </ul>
+  <p>Date de création : {{ order.created_at|date:"d/m/Y H:i" }}</p>
+  <p>Date de mise à jour : {{ order.updated_at|date:"d/m/Y H:i" }}</p>
+  
+  {% if user == order.buyer and order.status == 'pending' %}
+    <a href="{% url 'orders:checkout' order.pk %}" class="btn btn-primary">Procéder au paiement</a>
+  {% endif %}
+  
+  {% if user == order.buyer %}
+    <a href="{% url 'orders:invoice_pdf' order.pk %}" class="btn btn-secondary" target="_blank">Télécharger la facture PDF</a>
+  {% endif %}
+  
+  {% if user.is_authenticated and user == order.seller %}
+    <a href="{% url 'orders:seller_dashboard' %}">Tableau de bord vendeur</a>
+  {% endif %}
+  <a href="{% url 'orders:list' %}">Retour à la liste</a>
+{% endblock %}

@@ -1,0 +1,38 @@
+
+{% extends 'base.html' %}
+{% block content %}
+<h2>Tableau de bord vendeur</h2>
+
+<p>Total commandes : {{ total_orders }}</p>
+<p>Ventes totales : {{ total_sales|floatformat:0 }} GNF</p>
+<p>Paiements reçus : {{ total_paid|floatformat:0 }} GNF</p>
+
+<h3>Mes commandes</h3>
+<ul>
+    {% for o in orders %}
+        <li>
+            #{{ o.pk }} - {{ o.get_status_display }} - {{ o.total_amount }} GNF
+            (<a href="{% url 'orders:detail' o.pk %}">Détail</a>)
+        </li>
+    {% empty %}
+        <li>Aucune commande.</li>
+    {% endfor %}
+</ul>
+
+<h3>Livraisons</h3>
+<ul>
+    {% for d in deliveries %}
+        <li>
+            Commande #{{ d.order.pk }} - {{ d.get_status_display }}
+            {% if d.delivery_person %}
+                (Livreur : {{ d.delivery_person.username }})
+            {% else %}
+                (Non assignée)
+            {% endif %}
+        </li>
+    {% empty %}
+        <li>Aucune livraison.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Commander : {{ product.name }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <label>Quantité :</label>
+    <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" required>
+    <br>
+    <label>Adresse de livraison :</label>
+    <input type="text" name="delivery_address" id="delivery_address" required>
+    <button type="button" onclick="getLocation()">Me géolocaliser</button>
+    <input type="hidden" name="delivery_lat" id="delivery_lat">
+    <input type="hidden" name="delivery_lng" id="delivery_lng">
+    <br>
+    <button type="submit">Commander</button>
+</form>
+
+<script>
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      document.getElementById('delivery_lat').value = pos.coords.latitude;
+      document.getElementById('delivery_lng').value = pos.coords.longitude;
+      alert("Votre position a été enregistrée !");
+    }, function(error) { alert("Impossible d'obtenir la position."); });
+  } else {
+    alert("Votre navigateur ne supporte pas la géolocalisation.");
+  }
+}
+</script>
+
+<a href="{% url 'products:detail' product.pk %}">Retour au produit</a>
+{% endblock %}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>Facture Commande #{{ order.pk }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .head { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 25px;}
+        th, td { border: 1px solid #666; padding: 8px; }
+        th { background: #eee; }
+    </style>
+</head>
+<body>
+    <div class="head">
+        <h1>FACTURE</h1>
+        <h3>Commande #{{ order.pk }}</h3>
+        <p>Date : {{ order.created_at|date:"d/m/Y H:i" }}</p>
+    </div>
+    <p><b>Acheteur :</b> {{ order.buyer.get_full_name }}<br>
+    <b>Adresse livraison :</b> {{ order.delivery_address }}</p>
+    <p><b>Vendeur :</b> {{ order.seller.get_full_name }}</p>
+    <table>
+        <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix unitaire</th>
+            <th>Total</th>
+        </tr>
+        {% for item in order.items.all %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price }} GNF</td>
+            <td>{{ item.price|floatformat:0|add:""|floatformat:0|add:""|floatformat:0|add:""|floatformat:0 }} GNF</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <th colspan="3" style="text-align:right;">Total</th>
+            <th>{{ order.total_amount }} GNF</th>
+        </tr>
+    </table>
+    <p><b>Statut :</b> {{ order.get_status_display }}</p>
+</body>
+</html>

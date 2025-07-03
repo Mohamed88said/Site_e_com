@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Assigner un livreur pour la commande #{{ order.pk }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Assigner</button>
+</form>
+<a href="{% url 'orders:detail' order.pk %}">Retour à la commande</a>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>{% if form.instance.pk %}Modifier{% else %}Ajouter{% endif %} un produit</h3>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.new_category.label_tag }} {{ form.new_category }}
+    {% if form.new_category.help_text %}
+        <small class="form-text text-muted">{{ form.new_category.help_text }}</small>
+    {% endif %}
+    {{ form.name.label_tag }} {{ form.name }}
+    {{ form.description.label_tag }} {{ form.description }}
+    <button type="button" class="btn btn-info btn-sm" onclick="suggestAI()">Suggestion automatique</button>
+    {{ form.price.label_tag }} {{ form.price }}
+    {{ form.old_price.label_tag }} {{ form.old_price }}
+    {{ form.stock.label_tag }} {{ form.stock }}
+    {{ form.main_image.label_tag }} {{ form.main_image }}
+    {{ form.is_active.label_tag }} {{ form.is_active }}
+    {{ form.is_featured.label_tag }} {{ form.is_featured }}
+    {{ form.has_variants.label_tag }} {{ form.has_variants }}
+    <button type="submit" class="btn btn-success">Enregistrer</button>
+    <a href="{% url 'products:my_products' %}" class="btn btn-secondary">Retour</a>
+</form>
+<script>
+function suggestAI() {
+    // Suggestion locale : adapte si besoin
+    document.getElementById('id_description').value = "Ce produit est de haute qualité, idéal pour répondre à vos besoins quotidiens. Catégorie : Maison & Vie quotidienne.";
+    document.getElementById('id_new_category').value = "Maison & Vie quotidienne";
+}
+</script>
+{% endblock %}

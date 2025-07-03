@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Ma wishlist</h3>
+<form method="post" class="mb-3">
+    {% csrf_token %}
+    <button name="toggle_public" class="btn btn-outline-info btn-sm">
+        {% if wishlist.is_public %}Rendre privée{% else %}Rendre publique{% endif %}
+    </button>
+</form>
+
+{% if wishlist.is_public %}
+    <div class="alert alert-success">
+        Votre wishlist est publique.<br>
+        Lien à partager : 
+        <input type="text" readonly class="form-control" value="{{ request.build_absolute_uri|add:wishlist.get_absolute_url }}">
+        <a href="{% url 'public_wishlist' wishlist.slug %}">Voir comme visiteur</a>
+    </div>
+{% endif %}
+
+<ul>
+    {% for product in wishlist.products.all %}
+        <li>
+            <a href="{% url 'products:detail' product.pk %}">{{ product.name }}</a>
+        </li>
+    {% empty %}
+        <li>Votre wishlist est vide.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Comparateur de produits</h3>
+<div class="row">
+    {% for p in products %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            {% if p.main_image %}
+                <img src="{{ p.main_image.url }}" class="card-img-top" alt="{{ p.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ p.name }}</h5>
+                <p>Prix : {{ p.price }} GNF</p>
+                <p>Stock : {{ p.stock }}</p>
+                <p>Catégorie : {{ p.category }}</p>
+                <a href="{% url 'products:detail' p.pk %}" class="btn btn-primary btn-sm">Voir</a>
+                {% if user.is_authenticated and user.role == 'buyer' and p.stock > 0 %}
+                    <a href="{% url 'orders:create' p.pk %}" class="btn btn-success btn-sm">Ajouter au panier</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

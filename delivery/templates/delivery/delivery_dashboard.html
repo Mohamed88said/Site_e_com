@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Tableau de bord livreur</h2>
+<p>Total livraisons : {{ nb_total }}</p>
+<p>Livraisons à faire : {{ nb_en_attente }}</p>
+<p>Livraisons terminées : {{ nb_livrees }}</p>
+
+<h3>Mes livraisons</h3>
+<ul>
+{% for d in deliveries %}
+  <li>
+    Commande #{{ d.order.pk }} - {{ d.get_status_display }}
+    [<a href="{% url 'delivery:detail' d.pk %}">Détail</a>]
+    {% if d.status == 'assigned' %}
+      <form action="{% url 'delivery:start' d.pk %}" method="post" style="display:inline">
+        {% csrf_token %}
+        <button type="submit">Commencer la livraison</button>
+      </form>
+    {% elif d.status == 'in_transit' %}
+      <span style="color:orange">En cours de livraison</span>
+    {% elif d.status == 'delivered' %}
+      <span style="color:green">Livrée</span>
+    {% endif %}
+  </li>
+{% empty %}
+  <li>Aucune livraison.</li>
+{% endfor %}
+<p>Moyenne des notes : {{ request.user.deliveryprofile.rating|default:"-" }}/5</p>
+</ul>
+
+{% endblock %}

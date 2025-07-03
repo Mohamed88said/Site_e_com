@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Boutique de {{ vendor.username }}</h2>
+
+<p>
+    <strong>Nom :</strong> {{ profile.shop_name }}<br>
+    <strong>Description :</strong> {{ profile.shop_description }}<br>
+    <strong>Note :</strong> {{ profile.rating|default:"-" }}<br>
+    <strong>Badges :</strong>
+    {% for b in vendor.badges.all %}
+        <span class="badge bg-primary ms-1">{{ b.badge.icon }} {{ b.badge.name }}</span>
+    {% empty %}
+        <span class="text-muted">Aucun badge</span>
+    {% endfor %}
+</p>
+
+<hr>
+
+<h4>Produits du vendeur</h4>
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            {% if product.main_image %}
+                <img src="{{ product.main_image.url }}" class="card-img-top" alt="{{ product.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">{{ product.price }} GNF</p>
+                <a href="{% url 'products:detail' product.pk %}" class="btn btn-outline-primary">Voir</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><div class="alert alert-info">Aucun produit pour ce vendeur.</div></div>
+    {% endfor %}
+</div>
+
+{% endblock %}

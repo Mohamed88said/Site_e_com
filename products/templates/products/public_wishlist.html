@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Wishlist publique de {{ wishlist.user.username }}</h3>
+<ul>
+    {% for product in wishlist.products.all %}
+        <li>
+            <a href="{% url 'products:detail' product.pk %}">{{ product.name }}</a>
+        </li>
+    {% empty %}
+        <li>Aucun produit.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

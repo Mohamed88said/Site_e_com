@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-6">
+        {% if product.main_image %}
+            <img src="{{ product.main_image.url }}" class="img-fluid mb-3" alt="{{ product.name }}">
+        {% endif %}
+        {% if product.images.all %}
+            <div class="mb-2">
+                {% for img in product.images.all %}
+                    <img src="{{ img.image.url }}" alt="" style="width:60px;height:60px;object-fit:cover;" class="me-1">
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h3>{{ product.name }}
+            {% if product.is_new %}<span class="badge bg-success">Nouveau</span>{% endif %}
+            {% if product.has_promo %}<span class="badge bg-danger">Promo</span>{% endif %}
+            {% if product.is_low_stock %}<span class="badge bg-warning text-dark">Stock faible</span>{% endif %}
+        </h3>
+        <p class="text-muted"><strong>Catégorie :</strong> {{ product.category }}</p>
+        <p>{{ product.description }}</p>
+        <p>
+            <strong>Prix :</strong>
+            {% if product.promo %}
+                <span class="fw-bold text-danger">{{ product.promo_price }} GNF</span>
+                <span class="text-decoration-line-through text-muted">{{ product.price }} GNF</span>
+                <span class="badge bg-danger">-{{ product.promo.discount_percent|floatformat:0 }}%</span>
+                <small>Jusqu'au {{ product.promo.end|date:"D d/m H:i" }}</small>
+            {% else %}
+                <span class="fw-bold">{{ product.price }} GNF</span>
+            {% endif %}
+        </p>
+        <p><strong>Stock :</strong> {{ product.stock }}</p>
+        {% if product.is_low_stock %}
+            <div class="alert alert-warning">Plus que {{ product.stock }} en stock !</div>
+        {% endif %}
+
+        <p>
+            <strong>Vendeur :</strong>
+            <a href="{% url 'products:vendor_profile' product.seller.pk %}">{{ product.seller.username }}</a>
+            {% for b in product.seller.badges.all %}
+                <span class="badge bg-primary ms-1">{{ b.badge.icon }} {{ b.badge.name }}</span>
+            {% endfor %}
+        </p>
+
+        {% if is_favorite %}
+            <a href="{% url 'products:remove_from_wishlist' product.pk %}" class="btn btn-outline-danger btn-sm">Retirer des favoris</a>
+        {% else %}
+            <a href="{% url 'products:add_to_wishlist' product.pk %}" class="btn btn-outline-success btn-sm">Ajouter aux favoris</a>
+        {% endif %}
+        {% if user.is_authenticated and user.role == 'buyer' and product.stock > 0 %}
+            <a href="{% url 'orders:create' product.pk %}" class="btn btn-success btn-sm">Commander ce produit</a>
+        {% endif %}
+        {% if user.is_authenticated and user == product.seller %}
+            <a href="{% url 'products:edit' product.pk %}" class="btn btn-outline-primary btn-sm">Modifier</a>
+            <a href="{% url 'products:add_promotion' product.pk %}" class="btn btn-outline-warning btn-sm">Ajouter/éditer une promo</a>
+        {% endif %}
+        <a href="{% url 'products:report' product.pk %}" class="btn btn-outline-secondary btn-sm">Signaler</a>
+
+        <!-- Partage social -->
+        <div class="my-3">
+            <strong>Partager :</strong>
+            <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" title="WhatsApp"><img src="https://img.icons8.com/color/24/000000/whatsapp.png"/></a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" title="Facebook"><img src="https://img.icons8.com/color/24/000000/facebook.png"/></a>
+            <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}" target="_blank" title="Twitter"><img src="https://img.icons8.com/color/24/000000/twitter--v1.png"/></a>
+            <button onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}')" class="btn btn-outline-secondary btn-sm" title="Copier le lien">Copier le lien</button>
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<h4>Questions sur le produit</h4>
+{% for q in product.questions.all %}
+    <div class="mb-2">
+        <strong>{{ q.user.username }}</strong> : {{ q.question }}
+        <span title="likes">👍 {{ q.likes.count }}</span>
+        {% if user.is_authenticated and user == product.seller and q.answer %}
+            {% if not q.best_answer %}
+                <a href="{% url 'products:mark_best_answer' q.id %}" class="btn btn-outline-success btn-sm">Meilleure réponse</a>
+            {% else %}
+                <span class="badge bg-success">Meilleure réponse</span>
+            {% endif %}
+        {% elif q.best_answer %}
+            <span class="badge bg-success">Meilleure réponse</span>
+        {% endif %}
+        {% if q.answer %}
+            <br><em>Réponse : {{ q.answer }}</em>
+        {% endif %}
+    </div>
+{% empty %}
+    <div class="text-muted">Aucune question.</div>
+{% endfor %}
+
+{% if user.is_authenticated and user.role == 'buyer' %}
+    <form method="post">
+        {% csrf_token %}
+        {{ question_form.as_p }}
+        <button class="btn btn-outline-primary btn-sm">Poser une question</button>
+    </form>
+{% endif %}
+
+<hr>
+
+<h4>Avis des clients</h4>
+<a href="{% url 'products:all_reviews' product.pk %}" class="btn btn-link btn-sm">Voir tous les avis</a>
+
+<div>
+    <strong>Trier :</strong>
+    <a href="?sort=recent">Plus récent</a> | <a href="?sort=best">Mieux notés</a> | <a href="?sort=photo">Avec photo</a>
+</div>
+
+{% for review in reviews %}
+    <div class="border rounded p-2 my-2">
+        <strong>{{ review.user.username }}</strong> — {{ review.rating }}/5<br>
+        {{ review.comment }}<br>
+        {% if review.photo %}
+            <img src="{{ review.photo.url }}" alt="" style="width:60px;height:60px;object-fit:cover;">
+        {% endif %}
+        <span title="likes">👍 {{ review.likes.count }}</span>
+    </div>
+{% empty %}
+    <div class="text-muted">Aucun avis pour ce produit.</div>
+{% endfor %}
+
+{% if user.is_authenticated and user.role == 'buyer' and not already_reviewed %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ review_form.as_p }}
+        <button class="btn btn-outline-success btn-sm">Donner un avis</button>
+    </form>
+{% endif %}
+
+<hr>
+
+{% if similar %}
+<h5>Produits similaires</h5>
+<div class="row">
+    {% for p in similar %}
+        <div class="col-md-3 mb-2">
+            <a href="{% url 'products:detail' p.pk %}">
+                {% if p.main_image %}
+                    <img src="{{ p.main_image.url }}" class="img-fluid" style="max-height:70px;">
+                {% endif %}
+                <div>{{ p.name }}</div>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Assistant IA</h2>
+  <form method="post">
+    {% csrf_token %}
+    <textarea name="message" rows="3" cols="60" placeholder="Écrivez votre question...">{{ user_message }}</textarea><br>
+    <button type="submit">Envoyer</button>
+  </form>
+  {% if response %}
+    <div style="margin-top:20px; padding:10px; background:#eef;">
+      <strong>Réponse IA :</strong> {{ response }}
+    </div>
+  {% endif %}
+{% endblock %}

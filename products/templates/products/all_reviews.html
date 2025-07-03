@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Les avis pour {{ product.name }}</h3>
+<form method="get" class="mb-2">
+    <label>Trier&nbsp;:</label>
+    <select name="sort" onchange="this.form.submit()">
+        <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Plus récent</option>
+        <option value="best" {% if sort == 'best' %}selected{% endif %}>Mieux notés</option>
+        <option value="photo" {% if sort == 'photo' %}selected{% endif %}>Avec photo</option>
+    </select>
+</form>
+{% for review in reviews %}
+    <div class="mb-2 border rounded p-2">
+        <strong>{{ review.user.username }}</strong>
+        <span class="badge bg-warning text-dark">{{ review.rating }}/5</span> :
+        {{ review.comment }}
+        {% if review.photo %}
+            <br><img src="{{ review.photo.url }}" class="img-thumbnail mt-1" style="max-width:120px">
+        {% endif %}
+        <button class="btn btn-link btn-sm" onclick="likeReview({{ review.id }})">
+            👍 <span id="review-like-count-{{ review.id }}">{{ review.likes.count }}</span>
+        </button>
+    </div>
+{% empty %}
+    <div class="alert alert-info">Aucun avis pour ce produit.</div>
+{% endfor %}
+<a href="{% url 'products:detail' product.pk %}" class="btn btn-secondary btn-sm">Retour au produit</a>
+<script>
+function likeReview(id) {
+    fetch("{% url 'products:like_review' 0 %}".replace("0", id), {method: "POST", headers: {'X-CSRFToken': '{{ csrf_token }}'}})
+    .then(r=>r.json()).then(data=>{
+        document.getElementById("review-like-count-"+id).innerText = data.count;
+    });
+}
+</script>
+{% endblock %}

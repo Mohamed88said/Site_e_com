@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Noter le livreur pour la livraison #{{ delivery.pk }}</h2>
+<form method="post">
+    {% csrf_token %}
+    <label>Note (1 à 5) :</label>{{ form.note }}
+    <br>
+    <label>Commentaire :</label>{{ form.commentaire }}
+    <br>
+    <button type="submit">Valider</button>
+</form>
+{% endblock %}

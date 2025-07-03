@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Notifications</h2>
+<ul>
+    {% for n in notes %}
+        <li>
+            {% if n.url %}
+                <a href="{{ n.url }}">{{ n.message }}</a>
+            {% else %}
+                {{ n.message }}
+            {% endif %}
+            ({{ n.created_at|date:"d/m/Y H:i" }})
+        </li>
+    {% empty %}
+        <li>Aucune notification.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

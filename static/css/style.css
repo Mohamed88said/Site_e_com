@@ -1,0 +1,41 @@
+body {
+    background: #f9f9fb;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+}
+.navbar {
+    background: #005b4f;
+    color: #fff;
+}
+.navbar a {
+    color: #fff !important;
+    font-weight: 500;
+}
+.navbar .active, .navbar a:hover {
+    color: #ffe000 !important;
+    text-decoration: underline;
+}
+.container {
+    margin-top: 30px;
+}
+.card {
+    border-radius: 1rem;
+    box-shadow: 0 2px 10px #0001;
+}
+.btn-primary {
+    background: #005b4f;
+    border: none;
+}
+.btn-primary:hover {
+    background: #007c6c;
+}
+footer {
+    margin-top: 40px;
+    padding: 25px 0;
+    background: #005b4f;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+}
+.alert {
+    margin-top: 1rem;
+}

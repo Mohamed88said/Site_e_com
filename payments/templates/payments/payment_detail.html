@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Détail du paiement</h2>
+Commande : #{{ payment.order.pk }}<br>
+Montant : {{ payment.amount }} GNF<br>
+Méthode : {{ payment.get_method_display }}<br>
+Status : {{ payment.get_status_display }}<br>
+Date : {{ payment.payment_date }}<br>
+Transaction ID : {{ payment.transaction_id }}<br>
+
+{% if payment.qr_code %}
+    <h4>QR Code de paiement Mobile Money</h4>
+    <img src="{{ payment.qr_code.url }}" alt="QR Code Paiement" style="max-width:200px;">
+    <p>Scanne ce QR avec ton téléphone Mobile Money pour payer.</p>
+{% endif %}
+
+<a href="{% url 'payments:list' %}">Retour à la liste</a>
+{% endblock %}

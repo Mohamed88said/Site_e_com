@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="text-center py-4">
+    <h1 class="display-5">Bienvenue sur <span class="text-success">Guinée Makiti</span> !</h1>
+    <p class="lead">Plateforme de e-commerce moderne, adaptée à la Guinée.<br>
+    Achetez, vendez, livrez, payez en toute sécurité.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'products:list' %}">Voir les produits</a>
+</div>
+{% endblock %}

@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="delivery-container">
+  <h3>Détail Livraison pour Commande #{{ delivery.order.pk }}</h3>
+
+  <div class="delivery-info">
+    <p><span class="info-label">Status :</span> <span class="status-badge {{ delivery.status }}">{{ delivery.get_status_display }}</span></p>
+    <p><span class="info-label">Adresse :</span> {{ delivery.address }}</p>
+    {% if delivery.estimated_arrival %}
+    <p><span class="info-label">Estimation d'arrivée :</span> {{ delivery.estimated_arrival|timeuntil }}</p>
+    {% endif %}
+  </div>
+
+  {% if delivery.delivery_lat and delivery.delivery_lng %}
+    <div class="map-container">
+      <div id="map" style="height: 350px; width:100%; margin-bottom:20px;"></div>
+      <div class="map-legend">
+        <span class="legend-destination">📍 Adresse de livraison</span>
+        {% if delivery.current_lat and delivery.current_lng %}
+        <span class="legend-livreur">🚗 Position du livreur</span>
+        {% endif %}
+      </div>
+    </div>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+      // Initialisation de la carte
+      var map = L.map('map').setView([{{ delivery.delivery_lat }}, {{ delivery.delivery_lng }}], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+      
+      // Marqueur destination
+      var destMarker = L.marker([{{ delivery.delivery_lat }}, {{ delivery.delivery_lng }}], {
+        icon: L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/447/447031.png',
+          iconSize: [32, 32]
+        })
+      }).addTo(map).bindPopup("Adresse de livraison").openPopup();
+      
+      // Marqueur livreur
+      {% if delivery.current_lat and delivery.current_lng %}
+        var livreurIcon = L.icon({
+          iconUrl: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+          iconSize: [32, 32],
+          iconAnchor: [16, 32]
+        });
+        
+        var livreurMarker = L.marker([{{ delivery.current_lat }}, {{ delivery.current_lng }}], {
+          icon: livreurIcon,
+          zIndexOffset: 1000
+        }).addTo(map).bindPopup("Livreur (position actuelle)");
+        
+        // Trace l'itinéraire entre livreur et destination (optionnel)
+        var route = L.polyline([
+          [{{ delivery.current_lat }}, {{ delivery.current_lng }}],
+          [{{ delivery.delivery_lat }}, {{ delivery.delivery_lng }}]
+        ], {color: 'blue', dashArray: '5, 5'}).addTo(map);
+      {% endif %}
+      
+      // Rafraîchissement automatique pour les non-livreurs
+      {% if user != delivery.delivery_person %}
+      let refreshInterval;
+      function refreshLivreur() {
+        fetch("{% url 'delivery:position_update' delivery.pk %}")
+          .then(response => response.json())
+          .then(data => {
+            if (data.current_lat && data.current_lng) {
+              livreurMarker.setLatLng([data.current_lat, data.current_lng]);
+              route.setLatLngs([
+                [data.current_lat, data.current_lng],
+                [{{ delivery.delivery_lat }}, {{ delivery.delivery_lng }}]
+              ]);
+              map.panTo([data.current_lat, data.current_lng], {animate: true});
+            }
+          })
+          .catch(() => {
+            clearInterval(refreshInterval);
+            console.error('Erreur de mise à jour de position');
+          });
+      }
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        {% if delivery.current_lat and delivery.current_lng %}
+        refreshInterval = setInterval(refreshLivreur, 10000);
+        {% endif %}
+      });
+      {% endif %}
+    </script>
+  {% endif %}
+
+  {# Tracking position live : le livreur envoie sa position toutes les 10s #}
+  {% if user == delivery.delivery_person and delivery.status == 'in_transit' %}
+    <script>
+      let positionInterval;
+      function sendPosition() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              fetch("{% url 'delivery:update_position' delivery.pk %}", {
+                method: 'POST',
+                headers: {
+                  'X-CSRFToken': '{{ csrf_token }}',
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `lat=${pos.coords.latitude}&lng=${pos.coords.longitude}&accuracy=${pos.coords.accuracy}`
+              }).catch(console.error);
+            },
+            (err) => {
+              console.error('Erreur GPS:', err.message);
+              if (err.code === err.PERMISSION_DENIED) {
+                clearInterval(positionInterval);
+                alert('Permission GPS refusée. Activez la localisation pour le suivi.');
+              }
+            },
+            {enableHighAccuracy: true, timeout: 5000, maximumAge: 0}
+          );
+        }
+      }
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        positionInterval = setInterval(sendPosition, 10000);
+        sendPosition(); // Envoi immédiat
+      });
+    </script>
+  {% endif %}
+
+  {# QR code à présenter au client #}
+  {% if user == delivery.delivery_person and delivery.status == 'in_transit' %}
+    <div class="delivery-validation">
+      <h4>Validation de livraison</h4>
+      <div class="qr-section">
+        <p>Présentez ce QR code au client :</p>
+        <img src="{% url 'delivery:qr' delivery.pk %}" alt="QR Code Livraison" class="qr-code">
+        <p class="help-text">Le client doit scanner ce code pour valider la réception.</p>
+      </div>
+  
+      <div class="manual-validation">
+        <p>Ou saisissez manuellement le code :</p>
+        <form method="post" action="{% url 'delivery:mark_delivered' delivery.pk %}" class="code-form">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="delivery_code">Code de livraison :</label>
+            <input type="text" id="delivery_code" name="delivery_code" required class="form-control">
+          </div>
+          <button type="submit" class="btn btn-primary">Valider la livraison</button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="back-link">
+    <a href="{% url 'delivery:list' %}" class="btn btn-secondary">Retour à la liste</a>
+  </div>
+</div>
+
+<style>
+  .delivery-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .delivery-info {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .info-label {
+    font-weight: bold;
+    display: inline-block;
+    width: 150px;
+  }
+  
+  .status-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    color: white;
+  }
+  
+  .status-badge.pending {
+    background: #6c757d;
+  }
+  
+  .status-badge.in_transit {
+    background: #17a2b8;
+  }
+  
+  .status-badge.delivered {
+    background: #28a745;
+  }
+  
+  .status-badge.cancelled {
+    background: #dc3545;
+  }
+  
+  .map-container {
+    margin: 20px 0;
+  }
+  
+  .map-legend {
+    font-size: 0.9em;
+    margin-top: 5px;
+  }
+  
+  .legend-destination {
+    margin-right: 15px;
+  }
+  
+  .delivery-validation {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 5px;
+  }
+  
+  .qr-section {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .qr-code {
+    width: 200px;
+    height: 200px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: white;
+  }
+  
+  .help-text {
+    font-size: 0.9em;
+    color: #6c757d;
+  }
+  
+  .manual-validation {
+    margin-top: 20px;
+  }
+  
+  .code-form {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+  }
+  
+  .btn {
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  
+  .btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+  }
+  
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+  }
+  
+  hr {
+    margin: 25px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+  }
+</style>
+
+{% endblock %}

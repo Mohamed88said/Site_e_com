@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Payer la commande #{{ order.pk }}</h2>
+<p>Montant à payer : {{ order.total_amount }} GNF</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Payer</button>
+</form>
+<a href="{% url 'orders:detail' order.pk %}">Retour à la commande</a>
+{% endblock %}

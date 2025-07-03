@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-4">
+    <h2>Tableau de bord administrateur</h2>
+    <ul>
+        <li>Utilisateurs totaux : {{ nb_users }}</li>
+        <li>Vendeurs : {{ nb_sellers }}</li>
+        <li>Acheteurs : {{ nb_buyers }}</li>
+        <li>Produits : {{ nb_products }}</li>
+        <li>Commandes : {{ nb_orders }}</li>
+        <li>Paiements : {{ nb_payments }}</li>
+        <li>Livraisons : {{ nb_deliveries }}</li>
+        <li>Retours : {{ nb_returns }}</li>
+    </ul>
+    <a href="/admin/" class="btn btn-outline-primary">Accéder à l’admin Django complet</a>
+</div>
+{% endblock %}

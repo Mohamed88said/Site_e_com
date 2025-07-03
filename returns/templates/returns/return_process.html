@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Traiter la demande de retour</h2>
+<form method="post">
+    {% csrf_token %}
+    <label>Message à l'acheteur :</label>
+    <textarea name="response_message">{{ return_request.response_message }}</textarea><br>
+    <button type="submit" name="action" value="accept">Accepter</button>
+    <button type="submit" name="action" value="reject">Refuser</button>
+</form>
+<a href="{% url 'returns:detail' return_request.pk %}">Annuler</a>
+{% endblock %}

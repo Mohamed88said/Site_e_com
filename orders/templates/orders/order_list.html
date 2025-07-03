@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Mes commandes</h2>
+  <ul>
+    {% for order in orders %}
+      <li>
+        <a href="{% url 'orders:detail' order.pk %}">Commande #{{ order.pk }}</a>
+        - {{ order.status }}
+        - {{ order.total_amount }} GNF
+        - {{ order.created_at|date:"d/m/Y H:i" }}
+      </li>
+    {% empty %}
+      <li>Aucune commande.</li>
+    {% endfor %}
+    <a href="{% url 'orders:export_csv' %}" class="btn btn-success">Exporter CSV</a>
+    <a href="{% url 'orders:export_pdf' %}" class="btn btn-danger">Exporter PDF</a>
+  </ul>
+{% endblock %}

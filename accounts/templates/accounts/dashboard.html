@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-4">
+    <h2>Tableau de bord</h2>
+    <p>Bienvenue, {{ user.username }} ({{ user.get_role_display }})</p>
+    {% if user.role == 'seller' %}
+        <p><strong>Boutique : </strong> {{ profile.shop_name }}</p>
+        <p><strong>Description : </strong> {{ profile.shop_description }}</p>
+        <p><strong>Note : </strong> {{ profile.rating }}</p>
+    {% elif user.role == 'delivery' %}
+        <p><strong>Livreur</strong></p>
+        <p>Véhicule : {{ profile.vehicle_type }}</p>
+        <p>Disponible : {{ profile.available }}</p>
+    {% else %}
+        <p><strong>Profil acheteur</strong></p>
+    {% endif %}
+    <a class="btn btn-outline-danger mt-3" href="{% url 'accounts:logout' %}">Déconnexion</a>
+</div>
+{% endblock %}

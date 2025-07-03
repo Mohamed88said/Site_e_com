@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Tableau de bord vendeur</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Produits</h5>
+                <p class="card-text fs-3">{{ total_products }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Stock total</h5>
+                <p class="card-text fs-3">{{ total_stock }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Ventes totales (GNF)</h5>
+                <p class="card-text fs-3">{{ total_sales|floatformat:0 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Commandes</h5>
+                <p class="card-text fs-3">{{ total_orders }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Liens outils vendeur -->
+<div class="mb-3">
+    <a href="{% url 'products:export_catalogue' %}" class="btn btn-outline-info btn-sm">Exporter catalogue</a>
+    <a href="{% url 'products:import_catalogue' %}" class="btn btn-outline-info btn-sm">Importer catalogue</a>
+    <a href="{% url 'products:create_bundle' %}" class="btn btn-outline-info btn-sm">Créer un bundle</a>
+    <a href="{% url 'products:my_products' %}" class="btn btn-secondary btn-sm">Gérer mes produits</a>
+    <a href="{% url 'products:create' %}" class="btn btn-success btn-sm">Ajouter un produit</a>
+</div>
+
+<!-- Badges -->
+<div class="card mb-4">
+    <div class="card-header">Mes badges</div>
+    <div class="card-body">
+        {% if badges %}
+            {% for b in badges %}
+                <span class="badge bg-primary fs-5 me-2">
+                    {{ b.badge.icon }} {{ b.badge.name }}
+                </span>
+            {% endfor %}
+        {% else %}
+            <span class="text-muted">Aucun badge pour l'instant</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Évolution des ventes (par mois)</div>
+            <div class="card-body">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Top 5 produits vendus</div>
+            <div class="card-body">
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Produits en stock faible</div>
+            <ul class="list-group list-group-flush">
+                {% for p in products_low_stock %}
+                    <li class="list-group-item">
+                        <a href="{% url 'products:detail' p.pk %}">{{ p.name }}</a> ({{ p.stock }} en stock)
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">Aucun produit en stock faible.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Produits en promotion</div>
+            <ul class="list-group list-group-flush">
+                {% for p in promo_products %}
+                    <li class="list-group-item">
+                        <a href="{% url 'products:detail' p.pk %}">{{ p.name }}</a>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">Aucun produit en promotion.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: {{ months|safe }},
+            datasets: [{
+                label: 'Ventes (GNF)',
+                data: {{ sales_data|safe }},
+                fill: true,
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                tension: 0.3
+            }]
+        }
+    });
+
+    const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
+    const topProductsChart = new Chart(topProductsCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ top_products_labels|safe }},
+            datasets: [{
+                label: 'Quantité vendue',
+                data: {{ top_products_data|safe }},
+                backgroundColor: 'rgba(255, 193, 7, 0.7)'
+            }]
+        }
+    });
+</script>
+{% endblock %}

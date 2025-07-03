@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Commander {{ product.name }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+        {{ form.quantity.label_tag }} {{ form.quantity }}
+    </div>
+    <div>
+        {{ form.delivery_method.label_tag }} {{ form.delivery_method }}
+    </div>
+    <div>
+        {{ form.delivery_address.label_tag }} {{ form.delivery_address }}
+    </div>
+    <div>
+        {{ form.payment_method.label_tag }} {{ form.payment_method }}
+    </div>
+    <div>
+        {{ form.phone_number.label_tag }} {{ form.phone_number }}
+    </div>
+    <div>
+        {{ form.note.label_tag }} {{ form.note }}
+    </div>
+    <button type="submit" class="btn btn-success">Valider la commande</button>
+</form>
+{% endblock %}

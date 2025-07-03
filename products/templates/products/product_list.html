@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Nos produits</h2>
+
+<!-- Filtres dynamiques -->
+<form method="get" class="mb-4 border p-3 bg-light rounded">
+    <div class="row">
+        <div class="col-md-3">{{ form.search.label_tag }} {{ form.search }}</div>
+        <div class="col-md-2">{{ form.category.label_tag }} {{ form.category }}</div>
+        <div class="col-md-2">{{ form.price_min.label_tag }} {{ form.price_min }}</div>
+        <div class="col-md-2">{{ form.price_max.label_tag }} {{ form.price_max }}</div>
+        <div class="col-md-1">{{ form.in_stock }} {{ form.in_stock.label }}</div>
+        <div class="col-md-1">{{ form.promo }} {{ form.promo.label }}</div>
+        <div class="col-md-1">{{ form.with_image }} {{ form.with_image.label }}</div>
+        <div class="col-md-12 mt-2">
+            <button class="btn btn-primary btn-sm" type="submit">Filtrer</button>
+        </div>
+    </div>
+</form>
+
+<p><strong>{{ count }}</strong> produit{{ count|pluralize }} trouvé{{ count|pluralize }}.</p>
+
+<div class="mb-3">
+    <strong>Toutes catégories :</strong>
+    {% for c in categories %}
+        <span class="badge bg-secondary">{{ c.name }}</span>
+    {% endfor %}
+</div>
+
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-3 mb-4">
+        <div class="card h-100">
+            {% if product.main_image %}
+                <img src="{{ product.main_image.url }}" class="card-img-top" alt="{{ product.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}
+                    {% if product.is_new %}<span class="badge bg-success">Nouveau</span>{% endif %}
+                    {% if product.has_promo %}<span class="badge bg-danger">Promo</span>{% endif %}
+                    {% if product.is_low_stock %}<span class="badge bg-warning text-dark">Stock faible</span>{% endif %}
+                </h5>
+                <p class="mb-1">
+                    {% if product.has_promo %}
+                        <span class="fw-bold text-danger">{{ product.promo_price }} GNF</span>
+                        <span class="text-decoration-line-through text-muted">{{ product.price }} GNF</span>
+                    {% else %}
+                        <span class="fw-bold">{{ product.price }} GNF</span>
+                    {% endif %}
+                </p>
+                <a href="{% url 'products:detail' product.pk %}" class="btn btn-primary btn-sm">Voir</a>
+                {% if user.is_authenticated %}
+                    {% if product in user.wishlist.all %}
+                        <a href="{% url 'products:remove_from_wishlist' product.pk %}" class="btn btn-outline-danger btn-sm">Retirer des favoris</a>
+                    {% else %}
+                        <a href="{% url 'products:add_to_wishlist' product.pk %}" class="btn btn-outline-success btn-sm">Ajouter aux favoris</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><div class="alert alert-warning">Aucun produit trouvé.</div></div>
+    {% endfor %}
+</div>
+
+{% if user.is_authenticated and user.role == 'seller' %}
+    <a href="{% url 'products:my_products' %}" class="btn btn-outline-secondary">Gérer mes produits</a>
+{% endif %}
+
+{% endblock %}

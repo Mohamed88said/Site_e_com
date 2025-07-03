@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Mes livraisons</h2>
+  <ul>
+    {% for delivery in deliveries %}
+      <li>
+        <a href="{% url 'delivery:detail' delivery.pk %}">
+            Commande #{{ delivery.order.pk }} - {{ delivery.status }} ({{ delivery.order.buyer.username }} → {{ delivery.order.seller.username }})
+        </a>
+      </li>
+    {% empty %}
+      <li>Aucune livraison trouvée.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

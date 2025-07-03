@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Mon historique de commandes</h2>
+<form method="get">
+    <label>Statut :</label>
+    <select name="status">
+        <option value="">Tous</option>
+        {% for st, st_display in orders.model.STATUS_CHOICES %}
+        <option value="{{ st }}" {% if request.GET.status == st %}selected{% endif %}>{{ st_display }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filtrer</button>
+</form>
+<table>
+    <tr><th>ID</th><th>Date</th><th>Statut</th><th>Montant</th><th>Détail</th></tr>
+    {% for o in orders %}
+    <tr>
+        <td>{{ o.pk }}</td>
+        <td>{{ o.created_at|date:"d/m/Y H:i" }}</td>
+        <td>{{ o.get_status_display }}</td>
+        <td>{{ o.total_amount }}</td>
+        <td><a href="{% url 'orders:detail' o.pk %}">Voir</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

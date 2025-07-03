@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Ajouter une promotion pour {{ product.name }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Enregistrer</button>
+    <a href="{% url 'products:detail' product.pk %}" class="btn btn-secondary">Retour</a>
+</form>
+{% endblock %}

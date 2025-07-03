@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Détail de la demande de retour</h2>
+
+Commande : #{{ return_request.order.pk }}<br>
+Client : {{ return_request.user.username }}<br>
+Status : {{ return_request.get_status_display }}<br>
+Motif : {{ return_request.reason }}<br>
+Date : {{ return_request.created_at }}<br>
+Réponse vendeur : {{ return_request.response_message }}<br>
+
+{% if user == return_request.order.seller and return_request.status == 'pending' %}
+    <a href="{% url 'returns:process' return_request.pk %}">Traiter cette demande</a>
+{% endif %}
+<a href="{% url 'returns:list' %}">Retour à la liste</a>
+{% endblock %}
