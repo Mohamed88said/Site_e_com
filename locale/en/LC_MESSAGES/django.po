@@ -1,0 +1,76 @@
+# English translations for Guinée Makiti
+# Copyright (C) 2025
+# This file is distributed under the same license as the Guinée Makiti package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Guinée Makiti 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-01 12:00+0000\n"
+"PO-Revision-Date: 2025-01-01 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Welcome"
+msgstr "Welcome"
+
+msgid "Products"
+msgstr "Products"
+
+msgid "Orders"
+msgstr "Orders"
+
+msgid "Cart"
+msgstr "Cart"
+
+msgid "Wishlist"
+msgstr "Wishlist"
+
+msgid "Account"
+msgstr "Account"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Register"
+msgstr "Register"
+
+msgid "Logout"
+msgstr "Logout"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Add to Cart"
+msgstr "Add to Cart"
+
+msgid "Buy Now"
+msgstr "Buy Now"
+
+msgid "Price"
+msgstr "Price"
+
+msgid "Stock"
+msgstr "Stock"
+
+msgid "Category"
+msgstr "Category"
+
+msgid "Seller"
+msgstr "Seller"
+
+msgid "Delivery"
+msgstr "Delivery"
+
+msgid "Payment"
+msgstr "Payment"
+
+msgid "Reviews"
+msgstr "Reviews"
+
+msgid "Rating"
+msgstr "Rating"
